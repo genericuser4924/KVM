@@ -18,7 +18,7 @@ Open QGIS version 3 software (It is recommended to use the previous version 3.30
 
 Enter the option **Plugins** and then in the option **Manage and Install Plugins...**.
 
-![Instalación](Readme_Archivos/image001.jpg)
+(/Readme_Archivos/image001.jpg)
 
 *Figure 1 Manage and Install Plugins menu.*
 
