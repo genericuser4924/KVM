@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KVM QGIS Plugin - Step-by-Step Guide</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+            color: #222;
+        }
+        header {
+            background: #004466;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+        }
+        main {
+            max-width: 1000px;
+            margin: 20px auto 40px auto;
+            background: #fff;
+            padding: 20px 25px 40px 25px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        h2 {
+            color: #004466;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #006688;
+            margin-top: 25px;
+        }
+        p {
+            margin: 8px 0;
+        }
+        ol, ul {
+            margin: 8px 0 16px 20px;
+        }
+        .step {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .step:last-of-type {
+            border-bottom: none;
+        }
+        .screenshot {
+            margin: 10px 0 15px 0;
+            text-align: center;
+        }
+        .screenshot img {
+            max-width: 100%;
+            border: 1px solid #ccc;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .screenshot small {
+            display: block;
+            margin-top: 5px;
+            color: #555;
+        }
+        .note {
+            background: #e8f4ff;
+            border-left: 4px solid #2a7dd1;
+            padding: 10px 12px;
+            margin: 12px 0;
+            font-size: 0.95em;
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>KVM Plugin User Guide</h1>
+    <p>Technical Documentation Version</p>
+</header>
+
+<main>
+
+    <!-- 1. Introduction -->
+    <section id="intro">
+        <h2>1. Introduction</h2>
+        <p>The KVM plugin is a QGIS extension that enhances visualisation and kinematic velocity modelling of GNSS Continuously Operating Reference Stations (CORS) observations directly within QGIS.</p>
+        <p>A complementary method using circular statistics is employed to assess horizontal displacement as a vector characterized by magnitude and azimuth. KVM supports PBO and NEU formats and converts displacement data (North and East components) into polar coordinates (distance and azimuth) to calculate circular metrics. Circular statistics offer a robust and insightful framework for analysing GNSS CORS station time series by allowing the interpretation of horizontal displacements as vector processes.<p>
+        <p>This guide describes the complete workflow, from loading time-series data to generating charts and exporting the final outputs.</p>
+    </section>
+
+    <!-- 2. Main interface -->
+    <section id="interface">
+        <h2>2. Main KVM interface</h2>
+
+        <div class="step">
+            <h3>Panel Overview</h3>
+            <p>The main KVM panel is usually divided into several sections:</p> 
+            <ul>
+                <li>Input time series and parameters.</li>
+                <li>Validation options.</li>
+                <li>Visualisation area (results and chart).</li>
+                <li>Settings.</li>
+            </ul>
+            <div class="screenshot">
+                <img src="img/figure_a.jpg" alt="KVM main panel">
+                <small>Figure 1. General layout of the KVM plugin panel.</small>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Loading the Time Series and Input Parameters</h3>
+            <p>Use the drop-down to select the time series file, the plugin allows: .PBO, .NEU, and .TXT formats.</p>
+            <p>Next, specify the row where the file description or header section ends (for example: End Field Description, # -----------, etc.).</p>
+            <p>If the time series contains column headers, enable the corresponding checkbox.</p>
+            <p>Use the Verify option to preview the loaded data. Adjust the parameters as necessary until the time series is displayed correctly.</p>
+            <p>The plugin also allows loading a base map from different providers (for example: OpenStreetMap, Google Maps, Bing Satellite, ESRI, etc.).</p>
+            <p>Indicate whether the time series includes the CORS position for each record:</p>
+            <ul>
+                <li> Select <b>YES</b> if latitude and longitude are included, and specify the column names.</li>
+                <li> Select <b>NO</b> if coordinates are not included. In this case, the plugin allows the CORS station to be selected from a preloaded list (solution for GPS week 2237, day 6, CDDIS).</li>
+            </ul>
+            <div class="screenshot">
+                <img src="img/figure_b.jpg" alt="load time series in KVM">
+                <small>Figure 2. Loading time series and input parameters.</small>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Control buttons</h3>
+            <ul>
+                <li><strong>...</strong>: Load the time series file.</li>
+                <li><strong>Verify</strong>: Check that the file has been loaded correctly and that the description and data are properly separated.</li>
+                <li><strong>Yes / No</strong>: Indicate whether the time series contains CORS coordinates.</li>
+                <li><strong>Upload data</strong>: Display all records in the QGIS interface.</li>
+                <li><strong>Next</strong>: Proceed to the next step.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 3. Validation -->
+    <section id="validation">
+        <h2>3. Validation</h2>
+
+        <div class="step">
+            <h3>Selecting Time Data (Epoch)</h3>
+            <p>Select the column containing time information (for example: year-month-day (YYYYMMDD), Julian day (JJJJJ.JJJJJ), or decimal year (YYYY.YYYYYY)).</p>
+            <div class="screenshot">
+                <img src="img/figure_c.jpg" alt="Epoch format">
+                <small>Figure 3. Epoch format.</small>
+            </div>
+            <p>Dates are automatically converted to astronomical Julian Day format.</p>
+        </div>
+
+        <div class="step">
+            <h3>Selecting North Component Differences</h3>
+            <p>Select the column containing the differences in the North component relative to the NEU reference position.</p>
+            <h3>Selecting East Component Differences</h3>
+            <p>Select the column containing differences in the East component relative to the NEU reference position.</p>
+            <br>
+            <p>The KVM plugin automatically generates a Cartesian representation of the North/East differences and displays the data in a tabular format.</p>
+            <div class="screenshot">
+                <img src="img/figure_d.jpg" alt="Validation menu">
+                <small>Figure 4. Validation menu.</small>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Control buttons</h3>
+            <ul>
+                <li><strong>Next</strong>: Proceed to the next step.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 4. Results -->
+    <section id="results">
+        <h2>4. Results</h2>
+
+        <div class="step">
+            <h3>Method Selection</h3>
+            <p>Two analysis methods are available to analyse the time series information:</p>
+            <ul>
+                <li><b>Absolute Method:</b> Each recorded position is compared with the initial position at epoch zero or the selected reference epoch.</li>
+                <li><b>Relative Method:</b> Each recorded position is compared with the position at the immediately preceding epoch.</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Circular statistical results</h3>
+            <ul>
+                <li><b>Central tendency:</b> 
+                    <ul>
+                        <li>Mean azimuth.</li>
+                        <li>Mode azimuth.</li>
+                        <li>Median azimuth.</li>
+                    </ul>
+                </li>
+                <li><b>Dispersion:</b>
+                <ul> 
+                    <li>Discrepancy.</li>
+                    <li>Length of mean vector.</li>
+                    <li>Circular variance.</li>
+                    <li>Circular standard deviation.</li>
+                    <li>Angular variance.</li>
+                    <li>Mean angular deviation.</li>
+                    <li>Angular standard deviation.</li>
+                    <li>Circular dispersion.</li>
+                    <li>Von Mises concentration parameter.</li>
+                </ul>
+                </li>
+                <li><b>Shape:</b>
+                <ul>
+                    <li>Kurtosis coefficient.</li>
+                    <li>Skewness coefficient.</li>
+                </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Absolute method (Epoch interval)</h3>
+            <ul>
+                <li>Initial epoch: First record.</li>
+                <li>Final epoch: Last record.</li>
+                <li>Interval epoch: Time between records.</li>
+                <li>Number of interruptions: Gaps or jumps in the time series.</li>
+            </ul>
+            <div class="screenshot">
+                <img src="img/figure_g.jpg" alt="Results absolute method">
+                <small>Figure 5. Absolute method results.</small>
+            </div>            
+        </div>
+
+        <div class="step">
+            <h3>Relative method (Apparent Seasonal Variations - ASV)</h3>
+            <p>Analysis conducted in accordance with the methodology defined by the NATO Standardization Agreement (STANAG).</p>
+            <p>Outputs include:</p>
+            <ul>
+                <li>Mean variation.</li>
+                <li>Linear standard deviation.</li>
+                <li>Circular standard deviation.</li>
+                <li>Reference ASV.</li>
+                <li>Total number of ASV.</li>
+            </ul>
+            <div class="screenshot">
+                <img src="img/figure_h.jpg" alt="Results relative method">
+                <small>Figure 6. Relative method results.</small>
+            </div> 
+
+            <h4>List ASV.</h4>
+            <p>Displays all detected Apparent Seasonal Variations.</p>
+            <div class="screenshot">
+                <img src="img/figure_e.jpg" alt="List ASV">
+                <small>Figure 7. ASV List.</small>
+            </div>
+
+            <h4>ASV Visualisation</h4>
+            <ul>
+                <li><b>Blue arrows</b> indicate ASVs with daily displacement below the reference value.</li>
+                <li><b>Red arrows</b> indicate ASVs with daily displacement above the reference value.</p>
+            <div class="screenshot">
+                <img src="img/figure_f.jpg" alt="Upload ASV">
+                <small>Figure 8. ASV visualisation.</small>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Graphical results</h3>
+            <h4>Circular Graphics</h4>
+            <ul>
+                <li>Unit Circle.</li>
+                <li>Distance/Azimuth plot.</li>
+                <li>Density Map.</li>
+                <li>Skewness and Kurtosis.</li>
+                <li>QQ-plot (uniform quantiles).</li>
+            </ul>
+            <h4>Linear Graphics</h4>
+            <ul>
+                <li>Module Histogram.</li>
+            </ul>
+            <br>
+
+            <h3>Export options</h3>
+            <ul>
+                <li><b>Clipboard</b> Copy the graph to memory.</li>
+                <li><b>Save as SVG</b> Export the graphic in SVG format.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 5. Data -->
+    <section id="data">
+        <h2>5. Data</h2>
+        <p>The Data menu displays all processed records, including:</p>
+        <ul>
+            <li>Time (epoch).</li>
+            <li>North difference.</li>
+            <li>East difference.</li>
+            <li>Distance.</li>
+            <li>Azimuth.</li>
+        </ul>
+        <p>Data can be exported as CSV.</p>
+        <div class="screenshot">
+            <img src="img/figure_i.jpg" alt="Data menu">
+            <small>Figure 9. Data menu.</small>
+        </div>        
+    </section>
+
+    <!-- 6. Settings -->
+    <section id="settings">
+        <h2>5. Settings</h2>
+        <h4>Graphic Settings</h4>
+        <p>Configure graphical outputs:</p>
+        <ul>
+            <li>Number of rings.</li>
+            <li>Number of sectors.</li>
+            <li>Opacity.</li>
+            <li>Colours:
+            <ul>
+                <li>Rings.</li>
+                <li>Sectors.</li>
+                <li>Dots.</li>
+                <li>Lines.</li>
+                <li>Mean.</li>
+                <li>Deviation.</li>
+                <li>Density map.</li>
+            </ul></li>
+        </ul>
+        <br>
+        <h4>Report Settings</h4>
+        <p>Configure the generated report:</p>
+        <ul>
+            <li>Date.</li>
+            <li>Project description.</li>
+            <li>Include graphics (from clipboard).</li>
+            <li>Include data tables.</li>
+            <li>Generate HTML report.</li>
+        </ul>
+        <br>
+        <div class="screenshot">
+            <img src="img/figure_j.jpg" alt="Data menu">
+            <small>Figure 10. Settings menu.</small>
+        </div>        
+    </section>
+
+    <section id="regerences">
+        <h2>References:</h2>
+        <p>Fisher, N. I. (1993). Statistical Analysis of Circular Data. Cambridge University Press. https://doi.org/10.1017/CBO9780511564345</p>
+        <p>Mardia, K., & Jupp, P. (2000). In Directional Statistics. https://doi.org/10.1002/9780470316979<p>
+    </section>
+
+</main>
+
+<footer>
+    <p>KVM Plugin User Guide</p>
+</footer>
+
+</body>
+</html>
